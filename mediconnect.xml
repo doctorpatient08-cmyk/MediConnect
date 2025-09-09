@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediConnect - Hospital Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">🏥</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">MediConnect</h1>
+                </div>
+                <div id="userInfo" class="hidden">
+                    <span id="welcomeText" class="text-gray-600 mr-4"></span>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Login Selection Screen -->
+        <div id="loginSelection" class="fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Welcome to MediConnect</h2>
+                <p class="text-xl text-gray-600">Connecting patients with qualified doctors</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Patient Login -->
+                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-4xl">👤</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">Patient Login</h3>
+                        <p class="text-gray-600 mt-2">Book appointments and manage your health</p>
+                    </div>
+                    <button onclick="showLogin('patient')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                        Continue as Patient
+                    </button>
+                </div>
+
+                <!-- Doctor Login -->
+                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-4xl">👨‍⚕️</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">Doctor Login</h3>
+                        <p class="text-gray-600 mt-2">Manage patients and appointments</p>
+                    </div>
+                    <button onclick="showLogin('doctor')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                        Continue as Doctor
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Forms -->
+        <div id="loginForms" class="hidden fade-in">
+            <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+                <button onclick="backToSelection()" class="mb-4 text-blue-600 hover:text-blue-800 flex items-center">
+                    ← Back to selection
+                </button>
+                
+                <div id="patientLogin" class="hidden">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Patient Login</h3>
+                    <form onsubmit="loginUser(event, 'patient')">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2">Patient ID</label>
+                            <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your patient ID" required>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-semibold mb-2">Password</label>
+                            <input type="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                            Login as Patient
+                        </button>
+                    </form>
+                </div>
+
+                <div id="doctorLogin" class="hidden">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Doctor Login</h3>
+                    <form onsubmit="loginUser(event, 'doctor')">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2">Medical License Number</label>
+                            <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter license number" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-semibold mb-2">Doctor ID</label>
+                            <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your doctor ID" required>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-semibold mb-2">Password</label>
+                            <input type="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                            Login as Doctor
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Dashboard -->
+        <div id="patientDashboard" class="hidden fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Patient Dashboard</h2>
+                <p class="text-gray-600">Manage your appointments and health records</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Find Doctors -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Find Doctors</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer" onclick="showDoctorProfile('dr1')">
+                                <div class="flex items-center mb-3">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-xl">👨‍⚕️</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Dr. Sarah Johnson</h4>
+                                        <p class="text-sm text-gray-600">Cardiologist</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                        <span class="text-sm text-gray-600 ml-2">4.9 (127 reviews)</span>
+                                    </div>
+                                    <span class="text-green-600 font-semibold">Available</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors cursor-pointer" onclick="showDoctorProfile('dr2')">
+                                <div class="flex items-center mb-3">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-xl">👩‍⚕️</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Dr. Michael Chen</h4>
+                                        <p class="text-sm text-gray-600">Neurologist</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                        <span class="text-sm text-gray-600 ml-2">4.8 (89 reviews)</span>
+                                    </div>
+                                    <span class="text-green-600 font-semibold">Available</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Prescription -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Upload Previous Prescription</h3>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                            <div class="mb-4">
+                                <span class="text-4xl text-gray-400">📄</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">Upload your previous prescriptions for better consultation</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                                Choose Files
+                            </button>
+                            <p class="text-sm text-gray-500 mt-2">Supports PDF, JPG, PNG files</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Emergency Information -->
+                    <div class="bg-red-50 border-2 border-red-200 rounded-xl shadow-lg p-6">
+                        <div class="flex items-center mb-4">
+                            <span class="text-2xl mr-2">🚨</span>
+                            <h3 class="text-xl font-bold text-red-800">Emergency Information</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="bg-white rounded-lg p-4 border border-red-200">
+                                <h4 class="font-semibold text-red-800 mb-2">Drug Allergies</h4>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between bg-red-100 px-3 py-2 rounded">
+                                        <span class="text-red-800 font-medium">Penicillin</span>
+                                        <span class="text-xs bg-red-200 text-red-800 px-2 py-1 rounded">SEVERE</span>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-red-100 px-3 py-2 rounded">
+                                        <span class="text-red-800 font-medium">Aspirin</span>
+                                        <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">MODERATE</span>
+                                    </div>
+                                </div>
+                                <button onclick="manageDrugAllergies()" class="mt-3 text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition-colors">
+                                    Manage Allergies
+                                </button>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg p-4 border border-red-200">
+                                <h4 class="font-semibold text-red-800 mb-2">Food Allergies</h4>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between bg-orange-100 px-3 py-2 rounded">
+                                        <span class="text-orange-800 font-medium">Peanuts</span>
+                                        <span class="text-xs bg-red-200 text-red-800 px-2 py-1 rounded">SEVERE</span>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-orange-100 px-3 py-2 rounded">
+                                        <span class="text-orange-800 font-medium">Shellfish</span>
+                                        <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">MODERATE</span>
+                                    </div>
+                                </div>
+                                <button onclick="manageFoodAllergies()" class="mt-3 text-sm bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded transition-colors">
+                                    Manage Allergies
+                                </button>
+                            </div>
+
+                            <div class="bg-white rounded-lg p-4 border border-red-200">
+                                <h4 class="font-semibold text-red-800 mb-2">Emergency Contacts</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Primary:</span>
+                                        <span class="font-medium">+1 (555) 123-4567</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Secondary:</span>
+                                        <span class="font-medium">+1 (555) 987-6543</span>
+                                    </div>
+                                </div>
+                                <button onclick="manageEmergencyContacts()" class="mt-3 text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors">
+                                    Update Contacts
+                                </button>
+                            </div>
+
+                            <div class="bg-white rounded-lg p-4 border border-red-200">
+                                <h4 class="font-semibold text-red-800 mb-2">Blood Group & Medical Info</h4>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between bg-red-100 px-3 py-2 rounded">
+                                        <span class="text-red-800 font-medium">Blood Group</span>
+                                        <span class="text-lg font-bold text-red-800">O+</span>
+                                    </div>
+                                    <div class="space-y-1 text-sm">
+                                        <div class="bg-blue-100 px-2 py-1 rounded text-blue-800">Hypertension</div>
+                                        <div class="bg-purple-100 px-2 py-1 rounded text-purple-800">Type 2 Diabetes</div>
+                                    </div>
+                                </div>
+                                <button onclick="manageMedicalConditions()" class="mt-3 text-sm bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded transition-colors">
+                                    Update Medical Info
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors">
+                                Book Appointment
+                            </button>
+                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors">
+                                View Medical Records
+                            </button>
+                            <button class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors">
+                                Download Prescriptions
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Appointments -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Recent Appointments</h3>
+                        <div class="space-y-3">
+                            <div class="border-l-4 border-green-500 pl-4">
+                                <p class="font-semibold text-gray-800">Dr. Sarah Johnson</p>
+                                <p class="text-sm text-gray-600">Dec 15, 2024 - 2:00 PM</p>
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Completed</span>
+                            </div>
+                            <div class="border-l-4 border-blue-500 pl-4">
+                                <p class="font-semibold text-gray-800">Dr. Michael Chen</p>
+                                <p class="text-sm text-gray-600">Dec 20, 2024 - 10:00 AM</p>
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Upcoming</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor Dashboard -->
+        <div id="doctorDashboard" class="hidden fade-in">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Doctor Dashboard</h2>
+                <p class="text-gray-600">Manage your patients and appointments</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Main Content -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Profile Setup -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Profile & Credentials</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Specialization</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="e.g., Cardiology" value="Cardiology">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Experience (Years)</label>
+                                <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Years of experience" value="15">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Medical License</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="License number" value="MD123456">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Consultation Fee</label>
+                                <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Fee amount" value="500">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-gray-700 font-semibold mb-2">Upload Certificates</label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                <span class="text-2xl text-gray-400">📜</span>
+                                <p class="text-gray-600 mt-2">Upload your medical certificates</p>
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg mt-2 transition-colors">
+                                    Upload Files
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Patient Appointments -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Today's Appointments</h3>
+                        <div class="space-y-4">
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">John Smith</h4>
+                                        <p class="text-sm text-gray-600">Patient ID: P001 | Blood: O+ | Age: 45</p>
+                                        <p class="text-sm text-gray-600">10:00 AM - 10:30 AM</p>
+                                        <div class="flex items-center mt-2 space-x-2">
+                                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">⚠️ Penicillin Allergy</span>
+                                            <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">🥜 Peanut Allergy</span>
+                                        </div>
+                                    </div>
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Confirmed</span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="viewPatientHistory('P001')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors">
+                                        View History
+                                    </button>
+                                    <button onclick="createPrescription('P001')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors">
+                                        Create Prescription
+                                    </button>
+                                    <button onclick="viewEmergencyInfo('P001')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors">
+                                        🚨 Emergency Info
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Emma Wilson</h4>
+                                        <p class="text-sm text-gray-600">Patient ID: P002 | Blood: A- | Age: 32</p>
+                                        <p class="text-sm text-gray-600">11:00 AM - 11:30 AM</p>
+                                        <div class="flex items-center mt-2 space-x-2">
+                                            <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">⚠️ Aspirin Allergy</span>
+                                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">💊 Diabetes</span>
+                                        </div>
+                                    </div>
+                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm">Waiting</span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="viewPatientHistory('P002')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors">
+                                        View History
+                                    </button>
+                                    <button onclick="createPrescription('P002')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors">
+                                        Create Prescription
+                                    </button>
+                                    <button onclick="viewEmergencyInfo('P002')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors">
+                                        🚨 Emergency Info
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prescription Management -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Prescription Management</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-blue-800 mb-2">Digital Prescriptions</h4>
+                                <p class="text-sm text-gray-600 mb-3">Create and send prescriptions directly to patients</p>
+                                <button onclick="createDigitalPrescription()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors">
+                                    Create New Prescription
+                                </button>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-green-800 mb-2">Prescription History</h4>
+                                <p class="text-sm text-gray-600 mb-3">View all prescriptions you've created</p>
+                                <button onclick="viewPrescriptionHistory()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition-colors">
+                                    View History
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <div class="flex items-center mb-2">
+                                <span class="text-yellow-600 mr-2">⚠️</span>
+                                <h5 class="font-semibold text-yellow-800">Allergy Alert System</h5>
+                            </div>
+                            <p class="text-sm text-yellow-700">System automatically checks patient allergies before prescription creation and alerts you of potential conflicts.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Stats -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Your Stats</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Rating</span>
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                    <span class="ml-2 font-semibold">4.9</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Reviews</span>
+                                <span class="font-semibold">127</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Patients Treated</span>
+                                <span class="font-semibold">1,234</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Years Experience</span>
+                                <span class="font-semibold">15</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Reviews -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Recent Reviews</h3>
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-green-500 pl-4">
+                                <div class="flex items-center mb-1">
+                                    <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                </div>
+                                <p class="text-sm text-gray-600">"Excellent doctor, very professional and caring."</p>
+                                <p class="text-xs text-gray-500 mt-1">- John D.</p>
+                            </div>
+                            <div class="border-l-4 border-green-500 pl-4">
+                                <div class="flex items-center mb-1">
+                                    <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                                </div>
+                                <p class="text-sm text-gray-600">"Great consultation, explained everything clearly."</p>
+                                <p class="text-xs text-gray-500 mt-1">- Sarah M.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor Profile Modal -->
+        <div id="doctorProfileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">Doctor Profile</h3>
+                    <button onclick="closeDoctorProfile()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                </div>
+                
+                <div id="doctorProfileContent">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentUser = null;
+        let currentUserType = null;
+
+        function showLogin(type) {
+            document.getElementById('loginSelection').classList.add('hidden');
+            document.getElementById('loginForms').classList.remove('hidden');
+            
+            if (type === 'patient') {
+                document.getElementById('patientLogin').classList.remove('hidden');
+                document.getElementById('doctorLogin').classList.add('hidden');
+            } else {
+                document.getElementById('doctorLogin').classList.remove('hidden');
+                document.getElementById('patientLogin').classList.add('hidden');
+            }
+        }
+
+        function backToSelection() {
+            document.getElementById('loginForms').classList.add('hidden');
+            document.getElementById('loginSelection').classList.remove('hidden');
+        }
+
+        function loginUser(event, type) {
+            event.preventDefault();
+            currentUserType = type;
+            
+            // Hide login forms
+            document.getElementById('loginForms').classList.add('hidden');
+            
+            // Show appropriate dashboard
+            if (type === 'patient') {
+                document.getElementById('patientDashboard').classList.remove('hidden');
+                document.getElementById('welcomeText').textContent = 'Welcome, Patient';
+            } else {
+                document.getElementById('doctorDashboard').classList.remove('hidden');
+                document.getElementById('welcomeText').textContent = 'Welcome, Dr. Johnson';
+            }
+            
+            // Show user info in header
+            document.getElementById('userInfo').classList.remove('hidden');
+        }
+
+        function logout() {
+            // Hide all dashboards
+            document.getElementById('patientDashboard').classList.add('hidden');
+            document.getElementById('doctorDashboard').classList.add('hidden');
+            document.getElementById('userInfo').classList.add('hidden');
+            
+            // Show login selection
+            document.getElementById('loginSelection').classList.remove('hidden');
+            
+            currentUser = null;
+            currentUserType = null;
+        }
+
+        function showDoctorProfile(doctorId) {
+            const doctors = {
+                'dr1': {
+                    name: 'Dr. Sarah Johnson',
+                    specialty: 'Cardiologist',
+                    experience: '15 years',
+                    rating: '4.9',
+                    reviews: '127',
+                    education: 'MD from Harvard Medical School',
+                    license: 'MD123456',
+                    fee: '$500'
+                },
+                'dr2': {
+                    name: 'Dr. Michael Chen',
+                    specialty: 'Neurologist',
+                    experience: '12 years',
+                    rating: '4.8',
+                    reviews: '89',
+                    education: 'MD from Johns Hopkins',
+                    license: 'MD789012',
+                    fee: '$600'
+                }
+            };
+
+            const doctor = doctors[doctorId];
+            const content = `
+                <div class="text-center mb-6">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-4xl">${doctorId === 'dr1' ? '👨‍⚕️' : '👩‍⚕️'}</span>
+                    </div>
+                    <h4 class="text-2xl font-bold text-gray-800">${doctor.name}</h4>
+                    <p class="text-lg text-gray-600">${doctor.specialty}</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <h5 class="font-semibold text-gray-800 mb-2">Experience</h5>
+                        <p class="text-gray-600">${doctor.experience}</p>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold text-gray-800 mb-2">Rating</h5>
+                        <div class="flex items-center">
+                            <span class="text-yellow-500">⭐⭐⭐⭐⭐</span>
+                            <span class="ml-2">${doctor.rating} (${doctor.reviews} reviews)</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold text-gray-800 mb-2">Education</h5>
+                        <p class="text-gray-600">${doctor.education}</p>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold text-gray-800 mb-2">License</h5>
+                        <p class="text-gray-600">${doctor.license}</p>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold text-gray-800 mb-2">Consultation Fee</h5>
+                        <p class="text-gray-600">${doctor.fee}</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h5 class="font-semibold text-gray-800 mb-3">Available Time Slots</h5>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-3 rounded transition-colors">9:00 AM</button>
+                        <button class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-3 rounded transition-colors">10:00 AM</button>
+                        <button class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-3 rounded transition-colors">2:00 PM</button>
+                        <button class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-3 rounded transition-colors">3:00 PM</button>
+                        <button class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-3 rounded transition-colors">4:00 PM</button>
+                        <button class="bg-green-100 hover:bg-green-200 text-green-800 py-2 px-3 rounded transition-colors">5:00 PM</button>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button onclick="bookAppointment('${doctorId}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                        Book Appointment
+                    </button>
+                    <button onclick="rateDoctor('${doctorId}')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+                        Rate Doctor
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('doctorProfileContent').innerHTML = content;
+            document.getElementById('doctorProfileModal').classList.remove('hidden');
+        }
+
+        function closeDoctorProfile() {
+            document.getElementById('doctorProfileModal').classList.add('hidden');
+        }
+
+        function bookAppointment(doctorId) {
+            alert('Appointment booking functionality would be implemented here. The selected time slot would be reserved and confirmation sent to both patient and doctor.');
+            closeDoctorProfile();
+        }
+
+        function rateDoctor(doctorId) {
+            const rating = prompt('Rate this doctor (1-5 stars):');
+            if (rating && rating >= 1 && rating <= 5) {
+                alert(`Thank you for rating! Your ${rating}-star rating has been submitted and will help other patients choose the right doctor.`);
+                closeDoctorProfile();
+            }
+        }
+
+        function viewPatientHistory(patientId) {
+            alert(`Patient History for ${patientId}:\n\n🚨 EMERGENCY ALERTS:\n• Drug Allergy: Penicillin (SEVERE)\n• Food Allergy: Peanuts (SEVERE)\n\n📋 Medical History:\n• Previous prescriptions uploaded\n• Medical conditions: Hypertension, Type 2 Diabetes\n• Current medications: Lisinopril 10mg\n• Last visit: Dec 10, 2024\n\n📞 Emergency Contact: +1 (555) 123-4567\n\nThis critical information helps you provide safer care and avoid dangerous drug interactions.`);
+        }
+
+        function createPrescription(patientId) {
+            const prescription = prompt('Enter prescription details:');
+            if (prescription) {
+                alert(`Prescription created for patient ${patientId}!\n\n⚠️ ALLERGY CHECK PERFORMED:\n• Verified no Penicillin prescribed\n• Checked against food allergies\n\nThe prescription will be automatically sent to the patient's account and they can download it using their patient ID. A copy is also saved in your records.`);
+            }
+        }
+
+        // Emergency Information Management Functions
+        function manageDrugAllergies() {
+            alert('Drug Allergy Management:\n\n• Add new drug allergies\n• Update severity levels\n• Remove resolved allergies\n• Share with emergency contacts\n\nThis information is automatically shared with doctors during appointments to prevent dangerous prescriptions.');
+        }
+
+        function manageFoodAllergies() {
+            alert('Food Allergy Management:\n\n• Add new food allergies\n• Update severity levels\n• Remove resolved allergies\n• Set dietary restrictions\n\nThis helps doctors understand potential drug interactions and dietary considerations for your treatment.');
+        }
+
+        function manageEmergencyContacts() {
+            alert('Emergency Contact Management:\n\n• Update primary contact\n• Add secondary contacts\n• Set relationship details\n• Enable automatic notifications\n\nThese contacts will be notified in case of medical emergencies or if you\'re unable to communicate during treatment.');
+        }
+
+        function manageMedicalConditions() {
+            alert('Medical Conditions & Blood Group Management:\n\n• Add new conditions\n• Update blood group information\n• Track medication effectiveness\n• Share with healthcare providers\n• Update emergency medical info\n\nThis comprehensive medical history helps doctors make better treatment decisions and avoid complications.');
+        }
+
+        // New Doctor Functions
+        function viewEmergencyInfo(patientId) {
+            alert(`🚨 EMERGENCY INFORMATION - Patient ${patientId}\n\n🩸 BLOOD GROUP: O+\n\n⚠️ CRITICAL ALLERGIES:\n• Penicillin - SEVERE (Anaphylaxis risk)\n• Peanuts - SEVERE (Respiratory distress)\n• Aspirin - MODERATE (Skin reactions)\n\n💊 CURRENT MEDICATIONS:\n• Lisinopril 10mg (Hypertension)\n• Metformin 500mg (Diabetes)\n\n📞 EMERGENCY CONTACTS:\n• Primary: +1 (555) 123-4567 (Spouse)\n• Secondary: +1 (555) 987-6543 (Parent)\n\n🏥 MEDICAL CONDITIONS:\n• Hypertension (Controlled)\n• Type 2 Diabetes (Managed)\n\nThis information is critical for emergency treatment and drug prescriptions!`);
+        }
+
+        function createDigitalPrescription() {
+            const patientId = prompt('Enter Patient ID:');
+            if (patientId) {
+                alert(`Digital Prescription Creator\n\nPatient: ${patientId}\n\n✅ SAFETY CHECKS PERFORMED:\n• Allergy verification complete\n• Drug interaction check passed\n• Blood group compatibility verified\n\nPrescription will be:\n• Digitally signed with your license\n• Sent directly to patient's account\n• Available for pharmacy pickup\n• Stored in medical records\n\nThis ensures secure, traceable prescription management!`);
+            }
+        }
+
+        function viewPrescriptionHistory() {
+            alert('📋 PRESCRIPTION HISTORY\n\nRecent Prescriptions:\n\n• P001 - John Smith (Dec 15, 2024)\n  Lisinopril 10mg - Hypertension\n  Status: Dispensed ✅\n\n• P002 - Emma Wilson (Dec 14, 2024)\n  Metformin 500mg - Diabetes\n  Status: Pending pickup ⏳\n\n• P003 - Sarah Davis (Dec 13, 2024)\n  Amoxicillin 250mg - Infection\n  Status: Dispensed ✅\n\nAll prescriptions are digitally tracked and include allergy verification records for patient safety.');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('doctorProfileModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDoctorProfile();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97c6eaaea73b46ec',t:'MTc1NzQyMzMzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+  
